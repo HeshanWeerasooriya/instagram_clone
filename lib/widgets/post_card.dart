@@ -1,8 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-
+import 'package:provider/provider.dart';
+import '../providers/user_provider.dart';
+import '../resources/firestore_methods.dart';
 import '../utils/colors.dart';
+import 'like_animation.dart';
+import 'package:instagram_clone/models/user.dart' as model;
 
 class PostCard extends StatefulWidget {
   final snap;
@@ -17,6 +21,7 @@ class PostCard extends StatefulWidget {
 
 class _PostCardState extends State<PostCard> {
   int commentLen = 0;
+  bool isLikeAnimating = false;
 
   @override
   void initState() {
@@ -37,6 +42,8 @@ class _PostCardState extends State<PostCard> {
 
   @override
   Widget build(BuildContext context) {
+    final model.User user = Provider.of<UserProvider>(context).getUser;
+
     return Column(
       children: [
         // HEADER SECTION OF THE POST
@@ -108,22 +115,73 @@ class _PostCardState extends State<PostCard> {
           ),
         ),
         // IMAGE SECTION OF THE POST
-        SizedBox(
-          height: MediaQuery.of(context).size.height * 0.35,
-          width: double.infinity,
-          child: Image.network(
-            widget.snap['postUrl'].toString(),
-            fit: BoxFit.cover,
+        GestureDetector(
+          onDoubleTap: () {
+            FireStoreMethods().likePost(
+              widget.snap['postId'].toString(),
+              widget.snap['uid'].toString(),
+              widget.snap['likes'],
+            );
+            setState(() {
+              isLikeAnimating = true;
+            });
+          },
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.35,
+                width: double.infinity,
+                child: Image.network(
+                  widget.snap['postUrl'].toString(),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              AnimatedOpacity(
+                duration: const Duration(milliseconds: 200),
+                opacity: isLikeAnimating ? 1 : 0,
+                child: LikeAnimation(
+                  isAnimating: isLikeAnimating,
+                  child: const Icon(
+                    Icons.favorite,
+                    color: Colors.white,
+                    size: 100,
+                  ),
+                  duration: const Duration(
+                    milliseconds: 400,
+                  ),
+                  onEnd: () {
+                    setState(() {
+                      isLikeAnimating = false;
+                    });
+                  },
+                ),
+              ),
+            ],
           ),
         ),
         // LIKE, COMMENT SECTION OF THE POST
         Row(
           children: <Widget>[
-            IconButton(
-                icon: const Icon(
-                  Icons.favorite_border,
+            LikeAnimation(
+              isAnimating: widget.snap['likes'].contains(user.uid),
+              smallLike: true,
+              child: IconButton(
+                icon: widget.snap['likes'].contains(user.uid)
+                    ? const Icon(
+                        Icons.favorite,
+                        color: Colors.red,
+                      )
+                    : const Icon(
+                        Icons.favorite_border,
+                      ),
+                onPressed: () => FireStoreMethods().likePost(
+                  widget.snap['postId'].toString(),
+                  widget.snap['uid'].toString(),
+                  widget.snap['likes'],
                 ),
-                onPressed: () {}),
+              ),
+            ),
             IconButton(
                 icon: const Icon(
                   Icons.comment_outlined,
