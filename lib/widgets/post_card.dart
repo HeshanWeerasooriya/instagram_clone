@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:instagram_clone/screens/comments_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
@@ -30,14 +31,13 @@ class _PostCardState extends State<PostCard> {
   }
 
   fetchComments() async {
-    commentLen = await FirebaseFirestore.instance
+    QuerySnapshot snap = await FirebaseFirestore.instance
         .collection('posts')
         .doc(widget.snap['postId'])
         .collection('comments')
-        .snapshots()
-        .length;
+        .get();
 
-    setState(() {});
+    commentLen = snap.docs.length;
   }
 
   @override
@@ -49,8 +49,8 @@ class _PostCardState extends State<PostCard> {
         // HEADER SECTION OF THE POST
         Container(
           padding: const EdgeInsets.symmetric(
-            vertical: 4,
-            horizontal: 16,
+            vertical: 8,
+            horizontal: 8,
           ).copyWith(right: 0),
           child: Row(
             children: <Widget>[
@@ -186,7 +186,15 @@ class _PostCardState extends State<PostCard> {
                 icon: const Icon(
                   Icons.comment_outlined,
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => CommentsScreen(
+                        postId: widget.snap['postId'].toString(),
+                      ),
+                    ),
+                  );
+                }),
             IconButton(
                 icon: const Icon(
                   Icons.send,

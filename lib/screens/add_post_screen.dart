@@ -131,11 +131,14 @@ class _AddPostScreenState extends State<AddPostScreen> {
               centerTitle: false,
               actions: <Widget>[
                 TextButton(
-                  onPressed: () => postImage(
-                    userProvider.getUser.uid,
-                    userProvider.getUser.username,
-                    userProvider.getUser.photoUrl,
-                  ),
+                  onPressed: () {
+                    postImage(
+                      userProvider.getUser.uid,
+                      userProvider.getUser.username,
+                      userProvider.getUser.photoUrl,
+                    );
+                    FocusScope.of(context).unfocus();
+                  },
                   child: const Text(
                     "Post",
                     style: TextStyle(
