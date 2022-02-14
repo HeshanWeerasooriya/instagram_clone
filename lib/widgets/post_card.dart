@@ -37,7 +37,9 @@ class _PostCardState extends State<PostCard> {
         .collection('comments')
         .get();
 
-    commentLen = snap.docs.length;
+    setState(() {
+      commentLen = snap.docs.length;
+    });
   }
 
   @override
@@ -100,7 +102,10 @@ class _PostCardState extends State<PostCard> {
                                       child: Text(e),
                                     ),
                                     onTap: () {
-                                      // delete the post
+                                      FireStoreMethods().deletePost(
+                                        widget.snap['postId'].toString(),
+                                        Navigator.of(context).pop(),
+                                      );
                                     },
                                   ),
                                 )
