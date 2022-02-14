@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 import '../models/user.dart' as model;
 import 'package:provider/provider.dart';
 import '../providers/user_provider.dart';
+import '../resources/auth_methods.dart';
 import '../resources/firestore_methods.dart';
 import '../utils/colors.dart';
 import '../utils/utils.dart';
 import '../widgets/follow_button.dart';
+import 'login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String uid;
@@ -113,11 +115,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               children: <Widget>[
                                 user.uid == widget.uid
                                     ? FollowButton(
-                                        text: "Edit Profile",
+                                        text: 'Sign Out',
                                         backgroundColor: mobileBackgroundColor,
                                         textColor: primaryColor,
                                         borderColor: Colors.grey,
-                                        function: () {},
+                                        function: () async {
+                                          await AuthMethods().signOut();
+                                          Navigator.of(context).pushReplacement(
+                                            MaterialPageRoute(
+                                              builder: (context) =>
+                                                  const LoginScreen(),
+                                            ),
+                                          );
+                                        },
                                       )
                                     : isFollowing
                                         ? FollowButton(
